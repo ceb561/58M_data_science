@@ -69,3 +69,49 @@ ggsave("figures/fig1_low_hdi.tif",
        units = units,
        dpi = dpi)
 
+#define filename
+file_hdi <- ("data_raw/Human-development-index.csv")
+
+#all in 1!!!
+hdi3 <- read_csv(file_hdi) %>% 
+  janitor::clean_names() %>% 
+  pivot_longer(names_to = "year", 
+               values_to = "index",
+               cols = -c(hdi_rank_2018, country))%>%
+  mutate(year =  str_extract(year,"x[^\\s]+") %>% #remove "x" from year
+           str_replace("x", ""))%>% 
+  drop_na(index) %>% 
+  group_by(country) %>% 
+  summarise(mean_index = mean(index),
+            n          = length(index),
+            std_index  = sd(index),
+            se_index   = std_index/sqrt(n))%>% 
+  filter(rank(mean_index) < 11)%>% 
+  ggplot() +
+  geom_point(aes(x = country,
+                 y = mean_index)) +
+  geom_errorbar(aes(x = country,
+                    ymin = mean_index - se_index,
+                    ymax = mean_index + se_index)) +
+  scale_y_continuous(limits = c(0, 0.5),
+                     expand = c(0, 0),
+                     name = "HDI") +
+  scale_x_discrete(expand = c(0, 0),
+                   name = "") +
+  theme_classic() +
+  coord_flip()
+
+#write tidy data to file
+write.table(hdi_no_na, 
+            "data_processed/hdi_no_na.txt", 
+            quote = FALSE,
+            row.names = FALSE)
+
+write.table(hdi_summary, 
+            "data_processed/hdi_summary.txt", 
+            quote = FALSE,
+            row.names = FALSE)
+
+write.table(hdi_summary_low, 
+            "data_processed/hdi_summary_lowest_10_countries.txt", 
+            quote = FALSE,
