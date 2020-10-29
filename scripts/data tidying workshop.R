@@ -56,8 +56,8 @@ low_hdi_fig
 
 #parameters for saving figs
 units = "in"
-fig_w <- 3.2
-fig_h <- fig_w
+fig_w <- 6
+fig_h <- 2
 dpi <- 100
 device <- "tiff"
 
