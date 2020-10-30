@@ -44,3 +44,31 @@ units <- scan(file,
   str_replace("/", "_per_")
 # paste the variable name and its units together for the column names
 names(buoy44025) <- paste(measure, units, sep = "_")   
+
+
+
+
+
+
+
+
+#model answer for buoy data
+
+measure <- scan(file, 
+                nlines = 1,
+                what = character()) %>%
+  str_remove("#")
+# read in the units from the second line, removing the hash and
+# replacing the / with _per_ as / is a special character
+units <- scan(file, 
+              skip = 1,
+              nlines = 1, 
+              what = character()) %>% 
+  str_remove("#") %>% 
+  str_replace("/", "_per_")
+
+# paste the variable name and its units together for the column names
+names(buoy44025) <- paste(measure, units, sep = "_") 
+
+
+names(buoy44025)

@@ -29,6 +29,10 @@ hdi2 <- hdi %>%
 hdi_no_na <- hdi2 %>% 
   drop_na(index)
 
+#alternative method for removing na rows
+# hdi_no_na <- hdi2 %>%
+#   filter(!is.na(value))
+
 #summarise df
 hdi_summary <- hdi_no_na %>% 
   group_by(country) %>% 
