@@ -8,21 +8,22 @@ usethis::use_git_config(user.name = "Claire Brown",
 file_hdi <- ("data_raw/Human-development-index.csv")
 
 #read in file and tidy filenames
-hdi <- read_csv(file_hdi)
+hdi <- read_csv(file_hdi)%>% 
+  janitor::clean_names()
 
 
 #gather all columns apart from hdi_rank 2018 and country
 hdi2 <- hdi %>% 
   pivot_longer(names_to = "year", 
                values_to = "index",
-               cols = -c(hdi_rank_2018, country))%>%
+               cols = -c(hdi_rank_2018, country))
  
-# hdi2 <- hdi %>% 
-#   pivot_longer(names_to = "year", 
-#                values_to = "index",
-#                cols = -c(hdi_rank_2018, country))%>%
-#   mutate(year =  str_extract(year,"x[^\\s]+") %>% #remove "x" from year (only needed for janitor)
-#            str_replace("x", ""))
+hdi2 <- hdi %>% 
+  pivot_longer(names_to = "year",
+               values_to = "index",
+               cols = -c(hdi_rank_2018, country))%>%
+  mutate(year =  str_extract(year,"x[^\\s]+") %>% #remove "x" from year (only needed for janitor)
+           str_replace("x", ""))
 
 #remove na rows
 hdi_no_na <- hdi2 %>% 
@@ -78,7 +79,7 @@ ggsave("figures/fig1_low_hdi.tif",
 file_hdi <- ("data_raw/Human-development-index.csv")
 
 #all in 1!!!
-hdi3 <- read_csv(file_hdi) %>% 
+read_csv(file_hdi) %>% 
   janitor::clean_names() %>% 
   pivot_longer(names_to = "year", 
                values_to = "index",
@@ -94,7 +95,7 @@ hdi3 <- read_csv(file_hdi) %>%
   filter(rank(mean_index) < 11)%>% 
   ggplot() +
   geom_point(aes(x = country,
-                 y = mean_index)) +
+                 y = mean_index), colour="red") +
   geom_errorbar(aes(x = country,
                     ymin = mean_index - se_index,
                     ymax = mean_index + se_index)) +
