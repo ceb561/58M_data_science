@@ -8,16 +8,21 @@ usethis::use_git_config(user.name = "Claire Brown",
 file_hdi <- ("data_raw/Human-development-index.csv")
 
 #read in file and tidy filenames
-hdi <- read_csv(file_hdi) %>% 
-  janitor::clean_names()
+hdi <- read_csv(file_hdi)
+
 
 #gather all columns apart from hdi_rank 2018 and country
 hdi2 <- hdi %>% 
   pivot_longer(names_to = "year", 
                values_to = "index",
                cols = -c(hdi_rank_2018, country))%>%
-  mutate(year =  str_extract(year,"x[^\\s]+") %>% #remove "x" from year
-           str_replace("x", ""))
+ 
+# hdi2 <- hdi %>% 
+#   pivot_longer(names_to = "year", 
+#                values_to = "index",
+#                cols = -c(hdi_rank_2018, country))%>%
+#   mutate(year =  str_extract(year,"x[^\\s]+") %>% #remove "x" from year (only needed for janitor)
+#            str_replace("x", ""))
 
 #remove na rows
 hdi_no_na <- hdi2 %>% 
@@ -115,3 +120,4 @@ write.table(hdi_summary,
 write.table(hdi_summary_low, 
             "data_processed/hdi_summary_lowest_10_countries.txt", 
             quote = FALSE,
+            row.names = FALSE)
