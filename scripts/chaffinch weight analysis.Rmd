@@ -1,0 +1,52 @@
+---
+title: "Chaffinch weight analysis"
+author: "Claire Moulton-Brown"
+date: "04/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE,
+                      message = FALSE,
+                      fig.retina = 3)
+```
+
+
+```{r pkg}
+library(tidyverse)
+library(bookdown)
+```
+
+# Introduction
+We wanted to see if male of female chaffinches weigh more.
+
+# Methods
+These are the methods.
+
+# Results
+These are the results.
+
+```{r data import}
+chaff <- read_table2("../data_raw/chaff.txt")
+```
+```{r}
+chaff2 <- chaff %>% pivot_longer(names_to = "sex",
+                             values_to = "mass", cols = "everything"())
+chaff2            
+```
+
+
+# Discussion
+This is the discussion.
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

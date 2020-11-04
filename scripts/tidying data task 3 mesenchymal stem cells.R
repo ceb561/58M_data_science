@@ -53,8 +53,9 @@ sol <- sol %>%
   mutate(protid =  str_extract(accession, "1::[^;]+") %>% 
            str_replace("1::", ""))
 
-#Create a second dataframe, `sol2` in which the protein abundances are in a single column, `abundance` and the cell lineage and replicate, `lineage_rep`, is indicated in another. All the other variables should also be in the new data frame. 
-
+#Create a second dataframe, `sol2` in which the protein abundances 
+#are in a single column, `abundance` and the cell lineage and replicate,
+#`lineage_rep`, is indicated in another. All the other variables should also be in the new data frame. 
 sol2 <- sol %>% pivot_longer(names_to = "lineage_rep",
                              values_to = "abundance",
                              cols = starts_with("y"))
