@@ -1,0 +1,152 @@
+---
+title: "Mass of chaffinches"
+author: "Emma Rand"
+output:
+  bookdown::html_document2: default
+  bookdown::pdf_document2: default
+  bookdown::word_document2: default
+bibliography: ../refs/reference.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE,
+                      message = FALSE,
+                      fig.retina = 3)
+options(digits = 2)
+```
+
+```{r packages}
+library(tidyverse)
+```
+
+```{r functions}
+source("sum_sq.R")
+source("data_summary.R")
+```
+
+# Introduction {#introduction}
+
+The chaffinch, *Fringilla coelebs*, is one of the most widespread and common passerine bird species [@cramp_1994]. It is sexually dimorphic in plumage with males being brightly coloured with a blue-grey cap and rust-red underparts and females being grey-brown with paler underparts (see Figure \@ref(fig:chaff-photo-fig). This study aimed to determine whether *F.coelebs* were also sexually dimorphic in size.
+
+(ref:chaff-photo-fig) Adult *Fringilla coelebs* Left, male (by Andreas Trepte, CC BY-SA 2.5 <https://creativecommons.org/licenses/by-sa/2.5>, via Wikimedia Commons); right, female (4028mdk09, CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0>, via Wikimedia Commons)
+
+```{r chaff-photo-fig, out.width="40%", fig.show='hold', fig.cap='(ref:chaff-photo-fig)'}
+pics <- c("../pics/Chaffinch_(Fringilla_coelebs)male.jpg",
+          "../pics/Fulda_Buchfinkweibchen_Juni_2012female.JPG")
+knitr::include_graphics(pics)
+```
+
+# Methods
+
+```{r import}
+file <- "../data_raw/chaff.txt"
+chaff <- read_table2(file)
+```
+
+```{r tidy}
+chaff <- chaff %>%
+  pivot_longer(names_to = "sex", 
+               values_to = "mass",
+               cols = everything())
+```
+
+```{r summary}
+# sums of squares
+sums_of_sq <- sum_sq(chaff, mass, sex)
+# means, sd, se, n
+chaff_sum <- data_summary(chaff, mass, sex)
+```
+
+```{r extract-summary}
+# extract values for inline reporting
+# ss(x)
+m_ss <- sums_of_sq$ss[sums_of_sq$sex == "males"]
+f_ss <- sums_of_sq$ss[sums_of_sq$sex == "females"]
+# sample sizes
+n_males <- chaff_sum$n[chaff_sum$sex == "males"] 
+n_females <- chaff_sum$n[chaff_sum$sex == "females"] 
+# highest mean, se and the sex to which they belongs
+highestmean <- max(chaff_sum$mean) 
+highestse <- chaff_sum$se[chaff_sum$mean == highestmean] 
+highestsex <- chaff_sum$sex[chaff_sum$mean == highestmean]
+# lowest mean, se and the sex to which they belongs
+lowestmean <- min(chaff_sum$mean) 
+lowestse <- chaff_sum$se[chaff_sum$mean == lowestmean] 
+lowestsex <- chaff_sum$sex[chaff_sum$mean == lowestmean]
+```
+
+We randomly sampled `r n_males` male and `r n_females` female birds on the stray and determined their mass with spring scales. Analysis was carried out with R version 4.0.2 [@R-core] and tidyverse packages [@tidyverse].
+
+# Results
+
+```{r testing}
+mod <- lm(data = chaff, mass ~ sex)
+```
+
+```{r extract-testing}
+res <- summary(mod)
+tval <- res$coefficients["sexmales", "t value"]
+df <- res$df[2]
+if (res$coefficients["sexmales", "Pr(>|t|)"] < 0.001) {
+        b1p = "< 0.001"
+        }
+if (res$coefficients["sexmales", "Pr(>|t|)"] > 0.001) {
+        b1p = paste("=", round(res$coefficients["sexmales", "Pr(>|t|)"], 3))
+        }
+rsq <- res$r.squared
+```
+
+We wouldn't normally report the sum of the squared deviations ($SS(x)$) but we do so here to make use of a function. For males, the $SS(x)$ = `r m_ss` and for females, the $SS(x)$ = `r f_ss`
+
+
+`r str_to_sentence(highestsex)` ($\bar{x} \pm s.e.$: `r highestmean` $\pm$ `r highestse` g) have significantly higher mass than `r lowestsex` (`r lowestmean` $\pm$ `r lowestse` g)($t$ = `r tval`; $d.f.$ = `r df`; $p$ `r b1p`). See figure \@ref(fig:chaff-fig).
+
+```{r chaff-fig, fig.height=4, fig.width=4, fig.cap="(ref:chaff-fig)"}
+# note that the axis limits and significance labelling are not very reproducible here
+# they would likely need updating if the data altered.
+ggplot() +
+  geom_jitter(data = chaff, 
+              aes(x = sex, y = mass), 
+              width = 0.25, colour = "grey") +
+  geom_errorbar(data = chaff_sum,
+                aes(x = sex,
+                    ymin = mean,
+                    ymax = mean),
+                width = .3) +
+  geom_errorbar(data = chaff_sum,
+                aes(x = sex,
+                    ymin = mean - se,
+                    ymax = mean + se),
+                width = .5) +
+  geom_segment(aes(x = 1, y = 28, xend = 2, yend = 28),
+               size = 1) +
+  geom_segment(aes(x = 1, y = 28, xend = 1, yend = 27),
+               size = 1) +
+  geom_segment(aes(x = 2, y = 28, xend = 2, yend = 27),
+               size = 1) +
+  annotate("text", x = 1.5, y = 29,  label = paste("p",b1p)) +
+  scale_x_discrete(labels = c("Females", "Males"),
+                   name = "") +
+  scale_y_continuous(name = "Mass (g)",
+                     expand = c(0, 0),
+                     limits = c(0, 30)) +
+  theme_classic()
+```
+(ref:chaff-fig) Mass of adult chaffinches caught on the Stray. Error bars are $\bar{x} \pm 1 s.e.$   
+
+I've also gratuitously included a table with the same information just for the sake of including a table. See Table \@ref(tab:summary-table).
+
+```{r summary-table}
+knitr::kable(chaff_sum,
+             digits = 4,
+             caption = 'A summary of the data.',
+             row.names = FALSE)
+```
+
+
+# Discussion
+
+Here we pick up points from the introduction. See \@ref(introduction).
+
+# References
